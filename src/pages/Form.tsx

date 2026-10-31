@@ -1,0 +1,118 @@
+import React, { useContext, useState } from 'react';
+import { AppLayout } from '@/layouts/AppLayout';
+import { FormField } from '@/components/FormField';
+import { Alert } from '@/components/Alert';
+
+export interface FormData {
+    email: string;
+    subject: string;
+    message: string;
+}
+
+export interface FormErrors {
+    email?: string;
+    subject?: string;
+    message?: string;
+}
+
+export interface PageData {
+    appName?: string;
+    serverErrors?: string[];
+}
+
+export const FormPage: React.FC<PageData> = ({ appName = 'SahilPHP', serverErrors = [] }) => {
+    const [form, setForm] = useState<FormData>({
+        email: '',
+        subject: '',
+        message: '',
+    });
+
+    const [formErrors, setFormErrors] = useState<FormErrors>({});
+    const [serverFormErrors, setServerFormErrors] = useState<string[]>([]);
+
+    const updateField = (field: keyof FormData, value: string) => {
+        setForm((current) => ({ ...current, [field]: value }));
+        setFormErrors((current) => {
+            const next = { ...current };
+            delete next[field];
+            return next;
+        });
+    };
+
+    const validate = (): FormErrors => {
+        const next: FormErrors = {};
+        if (!form.email) next.email = 'Email is required.';
+        if (!form.subject) next.subject = 'Subject is required.';
+        if (!form.message) next.message = 'Message is required.';
+        return next;
+    };
+
+    const submit = (event: React.FormEvent) => {
+        event.preventDefault();
+        const errors = validate();
+        setFormErrors(errors);
+        if (Object.keys(errors).length > 0) {
+            return;
+        }
+
+        setServerFormErrors([
+            `Saved "${form.subject}" for ${form.email}. The framework proof-of-concept demo returns a server-side validation status.`,
+        ]);
+    };
+
+    return (
+        <AppLayout appName={appName}>
+            <div className="form-page">
+                <h1 className="form-page__title">Contact form</h1>
+                <p className="form-page__note">
+                    Form validation runs in two layers: field state is validated locally and the
+                    submit message below shows how a server response would surface validation errors.
+                </p>
+
+                <FormField
+                    name="email"
+                    label="Email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={form.email}
+                    onChange={(value) => updateField('email', value)}
+                    errors={formErrors}
+                    required
+                />
+
+                <FormField
+                    name="subject"
+                    label="Subject"
+                    type="text"
+                    placeholder="Project update"
+                    value={form.subject}
+                    onChange={(value) => updateField('subject', value)}
+                    errors={formErrors}
+                    required
+                />
+
+                <FormField
+                    name="message"
+                    label="Message"
+                    type="textarea"
+                    rows={5}
+                    placeholder="Tell us what you need."
+                    value={form.message}
+                    onChange={(value) => updateField('message', value)}
+                    errors={formErrors}
+                    required
+                />
+
+                <button type="submit" className="btn btn--primary" onClick={submit}>
+                    Send message
+                </button>
+
+                <Alert
+                    variant={serverFormErrors.length === 1 ? 'warning' : 'danger'}
+                    title={serverFormErrors.length === 1 ? 'Saved' : 'Errors'}
+                    message={serverFormErrors.join('\n')}
+                />
+            </div>
+        </AppLayout>
+    );
+};

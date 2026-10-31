@@ -1,0 +1,31 @@
+import React from 'react';
+
+export interface DashboardStat {
+    label: string;
+    value: string;
+}
+
+export interface DashboardCardProps {
+    title: string;
+    subtitle?: string;
+    items: DashboardStat[];
+}
+
+export const DashboardCard: React.FC<DashboardCardProps> = ({ title, subtitle, items }) => {
+    return (
+        <div className="dashboard-card">
+            <header className="dashboard-card__header">
+                <h2 className="dashboard-card__title">{title}</h2>
+                {subtitle && <p className="dashboard-card__subtitle">{subtitle}</p>}
+            </header>
+            <dl className="dashboard-card__stats">
+                {items.map((item) => (
+                    <div key={item.label} className="dashboard-card__stat">
+                        <dt className="dashboard-card__label">{item.label}</dt>
+                        <dd className="dashboard-card__value">{item.value}</dd>
+                    </div>
+                ))}
+            </dl>
+        </div>
+    );
+};

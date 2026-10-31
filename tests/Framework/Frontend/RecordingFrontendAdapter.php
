@@ -1,0 +1,56 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\SahilPHP\StarterKitReact\Framework\Frontend;
+
+use Sahil\Frontend\FrontendAdapterContract;
+use Sahil\Frontend\FrontendAssets;
+use Sahil\View\RenderedView;
+
+/** Test double for a React integration: records what the renderer asked for. */
+final class RecordingFrontendAdapter implements FrontendAdapterContract
+{
+    /** @var list<bool> */
+    public array $assetModes = [];
+
+    /** @param array<string, bool|int|float|string> $attributes */
+    public function __construct(
+        private readonly string $target = 'react',
+        private readonly string $component = 'Pages/Home.jsx',
+        private readonly array $attributes = ['data-framework' => 'react'],
+        private readonly ?string $script = 'http://127.0.0.1:5173/resources/js/app.js',
+        private readonly ?string $style = '/build/assets/app.css',
+    ) {
+    }
+
+    public function name(): string
+    {
+        return $this->target;
+    }
+
+    public function component(RenderedView $view): string
+    {
+        return $this->component;
+    }
+
+    public function payload(RenderedView $view): array
+    {
+        return $view->data();
+    }
+
+    public function mountAttributes(RenderedView $view): array
+    {
+        return $this->attributes;
+    }
+
+    public function assets(bool $development): FrontendAssets
+    {
+        $this->assetModes[] = $development;
+
+        return new FrontendAssets(
+            $this->script === null ? [] : [$this->script],
+            $this->style === null ? [] : [$this->style],
+        );
+    }
+}

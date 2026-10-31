@@ -1,0 +1,87 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\SahilPHP\StarterKitReact;
+
+use PHPUnit\Framework\TestCase;
+use Sahil\Frontend\FrontendConfiguration;
+use Sahil\Frontend\FrontendManager;
+use Sahil\Frontend\FrontendRenderer;
+use Sahil\Http\Response;
+use Sahil\View\RenderedView;
+use Tests\SahilPHP\StarterKitReact\Framework\Frontend\RecordingFrontendAdapter;
+
+final class ReactBootstrapTest extends TestCase
+{
+    private FrontendManager $manager;
+
+    protected function setUp(): void
+    {
+        $this->manager = new FrontendManager();
+    }
+
+    public function test_the_renderer_builds_a_vue_document_from_a_react_view(): void
+    {
+        $this->manager->register(new RecordingFrontendAdapter('react', 'Pages/Home.jsx'));
+
+        $renderer = new FrontendRenderer($this->manager, new FrontendConfiguration());
+
+        $response = $renderer->render(Response::react($this->view()));
+        $html = $response->body();
+
+        self::assertSame(200, $response->status());
+        self::assertStringStartsWith('<!doctype html>', $html);
+        self::assertStringContainsString('<html lang="en">', $html);
+        self::assertStringContainsString('<title>Home</title>', $html);
+        self::assertStringContainsString('<div id="app" data-component="Pages/Home.jsx" data-framework="react"></div>', $html);
+        self::assertStringContainsString('<script type="application/json" id="app-props">', $html);
+        self::assertStringContainsString('"title":"Home"', $html);
+        self::assertStringContainsString('src="http://127.0.0.1:5173/resources/js/app.js"', $html);
+        self::assertStringContainsString('href="/build/assets/app.css"', $html);
+        self::assertStringNotContainsString('server-rendered', $html);
+    }
+
+    public function test_not_found_page_component_is_used(): void
+    {
+        $this->manager->register(new RecordingFrontendAdapter('react', 'Pages/NotFound.jsx'));
+
+        $renderer = new FrontendRenderer($this->manager, new FrontendConfiguration());
+
+        $response = $renderer->render(
+            Response::react($this->view(['title' => 'Missing'])->withTemplate('pages.notFound')),
+        );
+
+        self::assertSame(200, $response->status());
+        self::assertStringContainsString('data-component="Pages/NotFound.jsx"', $response->body());
+    }
+
+    public function test_nested_page_name_maps_to_a_nested_component(): void
+    {
+        $this->manager->register(new RecordingFrontendAdapter('react', 'Pages/Dashboard/Index.jsx'));
+
+        $renderer = new FrontendRenderer($this->manager, new FrontendConfiguration());
+
+        $response = $renderer->render(
+            Response::react($this->view(['title' => 'Dashboard'])->withTemplate('pages.dashboard')),
+        );
+
+        self::assertSame(200, $response->status());
+        self::assertStringContainsString('data-component="Pages/Dashboard/Index.jsx"', $response->body());
+    }
+
+    public function test_missing_adapter_fails_with_an_actionable_error(): void
+    {
+        $renderer = new FrontendRenderer(new FrontendManager(), new FrontendConfiguration());
+
+        $this->expectException(\Sahil\Frontend\MissingFrontendAdapterException::class);
+        $this->expectExceptionMessage('No frontend adapter is registered for [react]');
+
+        $renderer->render(Response::react($this->view()));
+    }
+
+    private function view(array $data = ['title' => 'Home']): RenderedView
+    {
+        return new RenderedView('pages.home', $data, '<main>server-rendered</main>', ['engine' => 'sahil']);
+    }
+}

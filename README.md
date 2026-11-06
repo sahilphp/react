@@ -11,10 +11,24 @@ PHP data; Vite handles development HMR and production builds.
 - Node.js 20.19+
 - npm 10+
 
-## Create or install
+## Installation
+
+> [!WARNING]
+> This package is a **library**, not a project skeleton.
+> `composer create-project sahilphp/react` fails by design.
+> Create a project with `sahilphp new my-app` and choose **React** during
+> setup; the installer wires React, Vite and your CSS framework together.
+>
+> Install it as a dependency with:
+>
+> ```bash
+> composer require sahilphp/react
+> ```
+
+Create a new application with the installer:
 
 ```bash
-composer create-project sahilphp/starter-kit-react my-app
+sahilphp new my-app --ui-kit=react --css=tailwind
 cd my-app
 npm install
 ```

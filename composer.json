@@ -1,15 +1,19 @@
 {
     "name": "sahilphp/react",
-    "description": "A complete SahilPHP starter-kit with a React and TypeScript frontend.",
-    "type": "project",
+    "description": "React UI integration for SahilPHP applications.",
+    "type": "library",
     "license": "MIT",
     "keywords": [
         "sahilphp",
-        "starter-kit",
         "react",
         "typescript",
         "vite"
     ],
+    "homepage": "https://github.com/sahilphp/react",
+    "support": {
+        "issues": "https://github.com/sahilphp/react/issues",
+        "source": "https://github.com/sahilphp/react"
+    },
     "require": {
         "php": ">=8.2",
         "sahilphp/framework": "^1.0"
@@ -28,8 +32,10 @@
         }
     },
     "scripts": {
-        "start": "@php sahil start",
         "test": "phpunit --configuration phpunit.xml --colors=always",
+        "post-create-project-cmd": [
+            "@php scripts/refuse-create-project.php"
+        ],
         "test:js": "npm test",
         "check": "npm run check",
         "build": "npm run build"

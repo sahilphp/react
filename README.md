@@ -131,7 +131,7 @@ app/
   Http/                Controllers and middleware
   Providers/           Frontend and route/kernel wiring
 bootstrap/             Application and provider manifests
-config/                app.php, frontend.php
+config/                app.php, frontend.php, identification.php
 public/                Front controller, .htaccess, public assets
 routes/web.php         Route table
 src/
@@ -171,6 +171,12 @@ npm run build       # type check + production asset build
 development mode, dev server URL, build directory/public path, manifest
 location, entry point, asset verification and pages directory. Defaults are
 safe for local development and production builds.
+
+`config/identification.php` controls the public framework fingerprint: the
+`<meta name="generator" content="SahilPHP x.y.z">` tag injected into served
+documents and the `X-Powered-By: SahilPHP` response header. Set
+`SAHIL_IDENTIFICATION=false` (or `identification.enabled` to `false`) to
+disable both signals; `SAHIL_POWERED_BY=false` hides the header only.
 
 ## Framework boundary
 
